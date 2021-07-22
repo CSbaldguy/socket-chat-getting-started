@@ -11,17 +11,28 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('a user connected');
-  io.emit('user connection change', 'a user connected!');
+  io.emit('connection_change', 'a user connected!');
+
+  socket.username = 'anonymous';
+  socket.usercode = socket.id.substring(0, 5);
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
-    io.emit('user connection change', 'a user disconnected!');
+    io.emit('connection_change', 'a user disconnected!');
   });
 });
 
 io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
+  socket.on('chat_message', (msg) => {
     console.log('message: ' + msg);
-    io.emit('chat message', msg);
+    io.emit('chat_message', `${socket.username}@${socket.usercode}: ${msg}`);
+  });
+});
+
+io.on('connection', (socket) => {
+  socket.on('change_name', (input) => {
+    if (input.length <= 0 || input.length > 12) return;
+    socket.username = input;
   });
 });
 
