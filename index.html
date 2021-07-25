@@ -2,8 +2,12 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <style>
       body { margin: 0; padding-top: 3rem; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #user-counter { border: none; padding: 0.5rem; border-radius: 2rem; display: flex; justify-content: 'center'; height: 200px; background-color: 'red'; }
+      #user-name { border: none; padding: 0.5rem; border-radius: 2rem; display: flex; justify-content: 'center'; height: 200px; background-color: 'red'; }
 
       #form-name { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; top: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
       #input-name { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
@@ -22,6 +26,8 @@
   </head>
   <body>
     <form id="form-name" action="">
+      <p id="user-counter"></p>
+      <p id="user-name"></p>
       <input id="input-name" autocomplete="off" /><button>Change Name</button>
     </form>
   
@@ -40,6 +46,8 @@
       const messageInput = document.getElementById('input-message');
       const nameForm = document.getElementById('form-name');
       const nameInput = document.getElementById('input-name');
+      const userCount = document.getElementById('user-counter');
+      const userName = document.getElementById('user-name');
 
       messageForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -57,6 +65,12 @@
         }
       });
 
+      socket.on('initial_connect', function(dataObj) {
+        console.log(dataObj);
+        userCount.textContent = `User Count: ${dataObj.userCount}`;
+        userName.textContent = `User Name: ${dataObj.username}@${dataObj.usercode}`;
+      });
+
       socket.on('chat_message', function(msg) {
         const item = document.createElement('li');
         item.textContent = msg;
@@ -64,12 +78,13 @@
         window.scrollTo(0, document.body.scrollHeight);
       })
 
-      socket.on('connection_change', function(msg) {
+      socket.on('connection_change', function(dataObj) {
         const item = document.createElement('li');
         const subItem = document.createElement('b');
-        subItem.textContent = msg;
+        subItem.textContent = dataObj.msg;
         item.appendChild(subItem);
         messages.appendChild(item);
+        userCount.textContent = `User Count: ${dataObj.userCount}`;
         window.scrollTo(0, document.body.scrollHeight);
       })
     </script>

@@ -11,14 +11,35 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('a user connected');
-  io.emit('connection_change', 'a user connected!');
+  io.emit(
+    'connection_change', 
+    {
+      msg: 'a user connected!',
+      userCount: io.engine.clientsCount,
+    },
+  );
 
   socket.username = 'anonymous';
   socket.usercode = socket.id.substring(0, 5);
 
+  socket.emit(
+    'initial_connect', 
+    {
+      username: socket.username,
+      usercode: socket.usercode,
+      userCount: io.engine.clientsCount,
+    }
+  );
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
-    io.emit('connection_change', 'a user disconnected!');
+    io.emit(
+      'connection_change',
+      {
+        msg: 'a user disconnected',
+        userCount: io.engine.clientsCount,
+      },
+    );
   });
 });
 
