@@ -5,6 +5,8 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+let timeoutFunction = undefined;
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
@@ -21,6 +23,7 @@ io.on('connection', (socket) => {
 
   socket.username = 'anonymous';
   socket.usercode = socket.id.substring(0, 5);
+  socket.typing = false;
 
   socket.emit(
     'initial_connect', 
@@ -54,6 +57,23 @@ io.on('connection', (socket) => {
   socket.on('change_name', (input) => {
     if (input.length <= 0 || input.length > 12) return;
     socket.username = input;
+  });
+});
+
+io.on('connection', (socket) => {
+  socket.on('user_typing', () => {
+    if (socket.typing) {
+      clearTimeout(timeoutFunction);
+    } 
+    else {
+      socket.typing = true;
+      socket.broadcast.emit('user_typing', 'Someone is typing...');
+    }
+
+    timeoutFunction = setTimeout(() => {
+      socket.typing = false;
+      socket.broadcast.emit('user_typing', '');
+    }, 5000);
   });
 });
 

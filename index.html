@@ -22,6 +22,8 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages > li { padding: 0.5rem 1rem; }
       #messages > li:nth-child(odd) { background: #efefef; }
+
+      #user-typing { background: #efefef; padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 4rem; box-sizing: border-box; }
     </style>
   </head>
   <body>
@@ -33,6 +35,7 @@
   
     <ul id="messages"></ul>
   
+    <p id="user-typing"></p>
     <form id="form-message" action="">
       <input id="input-message" autocomplete="off" /><button>Send</button>
     </form>
@@ -48,6 +51,7 @@
       const nameInput = document.getElementById('input-name');
       const userCount = document.getElementById('user-counter');
       const userName = document.getElementById('user-name');
+      const userTyping = document.getElementById('user-typing');
 
       messageForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -61,6 +65,10 @@
         }
       });
 
+      messageForm.addEventListener("keydown", function(e) {
+        socket.emit('user_typing');
+      });      
+
       nameForm.addEventListener('submit', function(e){
         e.preventDefault();
         if (nameInput.value) {
@@ -70,7 +78,6 @@
       });
 
       socket.on('initial_connect', function(dataObj) {
-        console.log(dataObj);
         userCount.textContent = `User Count: ${dataObj.userCount}`;
         userName.textContent = `User Name: ${dataObj.username}@${dataObj.usercode}`;
       });
@@ -90,6 +97,10 @@
         messages.appendChild(item);
         userCount.textContent = `User Count: ${dataObj.userCount}`;
         window.scrollTo(0, document.body.scrollHeight);
+      })
+
+      socket.on('user_typing', function(msg) {
+        userTyping.textContent = msg;
       })
     </script>
   </body>
