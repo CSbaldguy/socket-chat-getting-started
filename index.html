@@ -52,6 +52,10 @@
       messageForm.addEventListener('submit', function(e) {
         e.preventDefault();
         if (messageInput.value) {
+          const item = document.createElement('li');
+          item.textContent = `You: ${messageInput.value}`;
+          messages.appendChild(item);
+
           socket.emit('chat_message', messageInput.value);
           messageInput.value = '';
         }
